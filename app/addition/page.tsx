@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export default function Addition() {
   const [operandA, setOperandA] = useState(() => getRandomNumber());
@@ -7,6 +7,10 @@ export default function Addition() {
   const [points, setPoints] = useState(0);
 
   const [userAnswer, setUserAnswer] = useState<string>("");
+
+  const allEquations = useRef(
+    Array.from(generateAllSingleDigitEquations().entries()),
+  );
 
   const correctAnswer = operandA + operandB;
 
@@ -25,13 +29,18 @@ export default function Addition() {
       setUserAnswer("");
     } else {
       setPoints((p) => p - 10);
+      setUserAnswer("");
       //implement after
     }
   }
 
   function generateNewQuestion() {
-    setOperandA(getRandomNumber());
-    setOperandB(getRandomNumber());
+    const randomPick = getRandomArbitrary(0, allEquations.current.length - 1);
+
+    const equationToDisplay = allEquations.current[randomPick][1];
+
+    setOperandA(equationToDisplay.operandA);
+    setOperandB(equationToDisplay.operandB);
   }
 
   return (
@@ -90,4 +99,50 @@ function getRandomNumber() {
 
 function getRandomArbitrary(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+type EquationStats = {
+  operandA: number;
+  operandB: number;
+  timesAttempted: number;
+  timesSolved: number;
+  timesWrong: number;
+  successRate: number;
+};
+
+function createEquationStatsForMap(
+  a: number,
+  b: number,
+  smallesToLargest = true,
+): EquationStats {
+  return {
+    operandA: a <= b && smallesToLargest ? a : b,
+    operandB: b >= a && smallesToLargest ? b : a,
+    successRate: 0,
+    timesAttempted: 0,
+    timesSolved: 0,
+    timesWrong: 0,
+  };
+}
+
+function createEquationStatsKey(es: EquationStats) {
+  return `${es.operandA}+${es.operandB}`;
+}
+
+function generateAllSingleDigitEquations() {
+  const answerTable: Map<string, EquationStats> = new Map<
+    string,
+    EquationStats
+  >();
+  for (let x = 1; x < 10; x++) {
+    for (let y = 1; y < 10; y++) {
+      const equationStat = createEquationStatsForMap(x, y, false);
+      const equationStatKey = createEquationStatsKey(equationStat);
+
+      if (!answerTable.get(equationStatKey)) {
+        answerTable.set(equationStatKey, equationStat);
+      }
+    }
+  }
+  return answerTable;
 }
