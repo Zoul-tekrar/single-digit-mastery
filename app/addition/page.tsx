@@ -1,5 +1,12 @@
 "use client";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { generateAllSingleDigitEquations } from "../data/additionData";
+import { EquationStats } from "./types/equationStats";
+import {
+  loadEquations as load,
+  loadEquations,
+  saveEquations,
+} from "../data/localStorageHelper";
 
 export default function Addition() {
   const [operandA, setOperandA] = useState(() => getRandomNumber());
@@ -8,11 +15,11 @@ export default function Addition() {
 
   const [userAnswer, setUserAnswer] = useState<string>("");
 
-  const allEquations = useRef(
-    Array.from(generateAllSingleDigitEquations().entries()),
-  );
+  const allEquations = useRef<[string, EquationStats][]>(loadEquations());
 
   const correctAnswer = operandA + operandB;
+
+  useEffect(() => {}, []);
 
   function handleAnswer(value: string): void {
     setUserAnswer(value);
@@ -30,7 +37,6 @@ export default function Addition() {
     } else {
       setPoints((p) => p - 10);
       setUserAnswer("");
-      //implement after
     }
   }
 
@@ -44,47 +50,50 @@ export default function Addition() {
   }
 
   return (
-    <div className="solving-window container mt-4">
+    <div className="solving-window container mt-5">
       <div className="text-light">
         <div className="card-band mt-3 mx-1">
           <div className="d-flex justify-content-between">
-            <p className="points-earned">{points}</p>
-            <p className="countdown"> 00 : 39</p>
+            <p className="points-earned display-4 ">{points}</p>
+            <p className="countdown display-4 "> 00 : 39</p>
           </div>
         </div>
-        <div className="card-content">
+        <div className="card-content my-5">
           <div className="text-center">
-            <p>
+            <p className="display-1 gold-colored">
               {operandA} + {operandB}
             </p>
           </div>
 
-          <input
-            value={userAnswer}
-            inputMode="numeric"
-            className="form-control"
-            onChange={(e) => handleAnswer(e.currentTarget.value)}
-          />
+          <div className="">
+            <input
+              autoFocus={true}
+              value={userAnswer}
+              inputMode="numeric"
+              className="form-control input-answer"
+              onChange={(e) => handleAnswer(e.currentTarget.value)}
+            />
+          </div>
         </div>
         <div className="card-band text-center mt-3">
           <button className="btn">
-            <i className="bi bi-volume-mute-fill"></i>
+            <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
           <button className="btn">
-            <i className="bi bi-volume-mute-fill"></i>
+            <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
           <button className="btn">
-            <i className="bi bi-volume-mute-fill"></i>
+            <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
           <button className="btn">
-            <i className="bi bi-volume-mute-fill"></i>
+            <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
           <button className="btn">
-            <i className="bi bi-volume-mute-fill"></i>
+            <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
         </div>
@@ -92,57 +101,10 @@ export default function Addition() {
     </div>
   );
 }
-
 function getRandomNumber() {
   return getRandomArbitrary(1, 10);
 }
 
 function getRandomArbitrary(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1) + min);
-}
-
-type EquationStats = {
-  operandA: number;
-  operandB: number;
-  timesAttempted: number;
-  timesSolved: number;
-  timesWrong: number;
-  successRate: number;
-};
-
-function createEquationStatsForMap(
-  a: number,
-  b: number,
-  smallesToLargest = true,
-): EquationStats {
-  return {
-    operandA: a <= b && smallesToLargest ? a : b,
-    operandB: b >= a && smallesToLargest ? b : a,
-    successRate: 0,
-    timesAttempted: 0,
-    timesSolved: 0,
-    timesWrong: 0,
-  };
-}
-
-function createEquationStatsKey(es: EquationStats) {
-  return `${es.operandA}+${es.operandB}`;
-}
-
-function generateAllSingleDigitEquations() {
-  const answerTable: Map<string, EquationStats> = new Map<
-    string,
-    EquationStats
-  >();
-  for (let x = 1; x < 10; x++) {
-    for (let y = 1; y < 10; y++) {
-      const equationStat = createEquationStatsForMap(x, y, false);
-      const equationStatKey = createEquationStatsKey(equationStat);
-
-      if (!answerTable.get(equationStatKey)) {
-        answerTable.set(equationStatKey, equationStat);
-      }
-    }
-  }
-  return answerTable;
 }

@@ -33,3 +33,17 @@ body {
   color: var(--accent);
 }
 
+.input-answer{
+  width: 50%;
+  margin: auto;
+  background-color: var(--muted);
+}
+
+.accent-colored{
+  color: var(--accent)
+}
+
+.gold-colored{
+  color: var(--accent-2)
+}
+
