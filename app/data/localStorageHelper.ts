@@ -1,3 +1,4 @@
+"use client";
 import { RefObject } from "react";
 import { EquationStats } from "../addition/types/equationStats";
 import { generateAllSingleDigitEquations } from "./additionData";
@@ -5,14 +6,21 @@ import { generateAllSingleDigitEquations } from "./additionData";
 const STORAGE_KEY = "allEquations_v1";
 
 export function saveEquations(entries: [string, EquationStats][]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  const jsonStringify = JSON.stringify(entries);
+  localStorage.setItem(STORAGE_KEY, jsonStringify);
 }
 
-export function loadEquations(): [string, EquationStats][] {
+export function loadEquations(): Map<string, EquationStats> {
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return Array.from(generateAllSingleDigitEquations().entries());
+  console.log(`load raw: ${raw}`);
+  let jsonToObject;
+  if (raw) {
+    jsonToObject = JSON.parse(raw).entries as Map<string, EquationStats>;
+  }
+  console.log(jsonToObject);
+  if (!raw) return generateAllSingleDigitEquations();
   try {
-    return JSON.parse(raw) as [string, EquationStats][];
+    return jsonToObject;
   } catch {
     throw Error("Couldn't load");
   }

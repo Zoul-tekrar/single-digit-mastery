@@ -8,7 +8,10 @@ export function generateAllSingleDigitEquations() {
   for (let x = 1; x < 10; x++) {
     for (let y = 1; y < 10; y++) {
       const equationStat = createEquationStatsForMap(x, y, false);
-      const equationStatKey = createEquationStatsKey(equationStat);
+      const equationStatKey = createEquationStatsKey(
+        equationStat.operandA,
+        equationStat.operandB,
+      );
 
       if (!answerTable.get(equationStatKey)) {
         answerTable.set(equationStatKey, equationStat);
@@ -18,7 +21,7 @@ export function generateAllSingleDigitEquations() {
   return answerTable;
 }
 
-function createEquationStatsForMap(
+export function createEquationStatsForMap(
   a: number,
   b: number,
   smallesToLargest = true,
@@ -33,6 +36,6 @@ function createEquationStatsForMap(
   };
 }
 
-function createEquationStatsKey(es: EquationStats) {
-  return `${es.operandA}+${es.operandB}`;
+export function createEquationStatsKey(operandA: number, operandB: number) {
+  return `${operandA}+${operandB}`;
 }

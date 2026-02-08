@@ -1,6 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { generateAllSingleDigitEquations } from "../data/additionData";
+import {
+  createEquationStatsKey,
+  generateAllSingleDigitEquations,
+} from "../data/additionData";
 import { EquationStats } from "./types/equationStats";
 import {
   loadEquations as load,
@@ -15,11 +18,13 @@ export default function Addition() {
 
   const [userAnswer, setUserAnswer] = useState<string>("");
 
-  const allEquations = useRef<[string, EquationStats][]>(loadEquations());
+  const allEquations = useRef<Map<string, EquationStats>>(new Map());
 
   const correctAnswer = operandA + operandB;
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    allEquations.current = loadEquations();
+  }, []);
 
   function handleAnswer(value: string): void {
     setUserAnswer(value);
@@ -30,20 +35,33 @@ export default function Addition() {
 
     if (value.length != correctAnswer.toString().length) return;
 
+    const equationStatKey = createEquationStatsKey(operandA, operandB);
+    const equationAttempted = allEquations.current.get(equationStatKey);
+    if (!equationAttempted) throw new Error("Equation not found");
+
+    equationAttempted.timesAttempted++;
+
     if (numericAnswer === correctAnswer) {
       generateNewQuestion();
       setPoints((p) => p + 10);
       setUserAnswer("");
+      equationAttempted.timesSolved++;
     } else {
-      setPoints((p) => p - 10);
+      setPoints((p) => (p - 10 < 0 ? 0 : p - 10));
       setUserAnswer("");
+      equationAttempted.timesWrong++;
     }
+
+    allEquations.current.set(equationStatKey, equationAttempted);
+    saveEquations(Array.from(allEquations.current));
   }
 
   function generateNewQuestion() {
-    const randomPick = getRandomArbitrary(0, allEquations.current.length - 1);
+    const allEquationsAsArray =
+      allEquations.current && Array.from(allEquations.current);
+    const randomPick = getRandomArbitrary(0, allEquationsAsArray.length - 1);
 
-    const equationToDisplay = allEquations.current[randomPick][1];
+    const equationToDisplay = allEquationsAsArray[randomPick][1];
 
     setOperandA(equationToDisplay.operandA);
     setOperandB(equationToDisplay.operandB);
@@ -102,7 +120,7 @@ export default function Addition() {
   );
 }
 function getRandomNumber() {
-  return getRandomArbitrary(1, 10);
+  return getRandomArbitrary(1, 9);
 }
 
 function getRandomArbitrary(min: number, max: number) {
