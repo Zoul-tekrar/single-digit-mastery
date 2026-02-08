@@ -12,12 +12,12 @@ export function saveEquations(entries: [string, EquationStats][]) {
 
 export function loadEquations(): Map<string, EquationStats> {
   const raw = localStorage.getItem(STORAGE_KEY);
-  console.log(`load raw: ${raw}`);
   let jsonToObject;
   if (raw) {
-    jsonToObject = JSON.parse(raw).entries as Map<string, EquationStats>;
+    jsonToObject = new Map<string, EquationStats>(
+      JSON.parse(raw) as [string, EquationStats][],
+    );
   }
-  console.log(jsonToObject);
   if (!raw) return generateAllSingleDigitEquations();
   try {
     return jsonToObject;

@@ -16,6 +16,10 @@ export default function Addition() {
   const [operandB, setOperandB] = useState(() => getRandomNumber());
   const [points, setPoints] = useState(0);
 
+  const [focusOnWeakness, setFocusOnWeakness] = useState(false);
+
+  const [doubleDigitAnswers, setDoubleDigitAnswers] = useState(false);
+
   const [userAnswer, setUserAnswer] = useState<string>("");
 
   const allEquations = useRef<Map<string, EquationStats>>(new Map());
@@ -36,6 +40,7 @@ export default function Addition() {
     if (value.length != correctAnswer.toString().length) return;
 
     const equationStatKey = createEquationStatsKey(operandA, operandB);
+    console.log(`allEquations.current: ${typeof allEquations.current}`);
     const equationAttempted = allEquations.current.get(equationStatKey);
     if (!equationAttempted) throw new Error("Equation not found");
 
@@ -51,17 +56,31 @@ export default function Addition() {
       setUserAnswer("");
       equationAttempted.timesWrong++;
     }
+    equationAttempted.successRate =
+      equationAttempted.timesSolved / equationAttempted.timesAttempted;
 
     allEquations.current.set(equationStatKey, equationAttempted);
     saveEquations(Array.from(allEquations.current));
   }
 
   function generateNewQuestion() {
-    const allEquationsAsArray =
-      allEquations.current && Array.from(allEquations.current);
-    const randomPick = getRandomArbitrary(0, allEquationsAsArray.length - 1);
+    let poolOfEquations = Array.from(allEquations.current);
 
-    const equationToDisplay = allEquationsAsArray[randomPick][1];
+    if (doubleDigitAnswers)
+      poolOfEquations = poolOfEquations.filter(
+        (e) => e[1].answer.toString().length === 2,
+      );
+
+    if (focusOnWeakness) {
+      poolOfEquations = poolOfEquations
+        .sort((a, b) => a[1].successRate - b[1].successRate)
+        .slice(0, 10);
+    }
+    console.log(poolOfEquations);
+
+    const randomPick = getRandomArbitrary(0, poolOfEquations.length - 1);
+
+    const equationToDisplay = poolOfEquations[randomPick][1];
 
     setOperandA(equationToDisplay.operandA);
     setOperandB(equationToDisplay.operandB);
@@ -114,6 +133,26 @@ export default function Addition() {
             <i className="bi bi-volume-mute-fill display-3"></i>
             {/* <i class="bi bi-volume-mute"></i> */}
           </button>
+        </div>
+        <div className="d-flex justify-content-between mt-3">
+          <div className="p-2">
+            <button
+              className={`btn${focusOnWeakness && " btn-primary"}`}
+              aria-pressed="false"
+              onClick={() => setFocusOnWeakness(!focusOnWeakness)}
+            >
+              Focus on Weak Areas
+            </button>
+          </div>
+          <div className="">
+            <button
+              className={`btn${doubleDigitAnswers && " btn-primary"}`}
+              aria-pressed="false"
+              onClick={() => setDoubleDigitAnswers(!doubleDigitAnswers)}
+            >
+              Double digits only
+            </button>
+          </div>
         </div>
       </div>
     </div>

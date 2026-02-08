@@ -33,6 +33,7 @@ export function createEquationStatsForMap(
     timesAttempted: 0,
     timesSolved: 0,
     timesWrong: 0,
+    answer: a + b,
   };
 }
 

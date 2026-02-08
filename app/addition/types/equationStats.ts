@@ -5,4 +5,5 @@ export type EquationStats = {
   timesSolved: number;
   timesWrong: number;
   successRate: number;
+  answer: number;
 };
